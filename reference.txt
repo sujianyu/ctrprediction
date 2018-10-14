@@ -1,0 +1,10 @@
+http://techblog.youdao.com/wp-content/uploads/2015/03/Avazu-CTR-Prediction.pdf
+
+http://www.danniguo.com/index.php/archives/155/
+
+https://blog.csdn.net/zc02051126/article/details/54379244
+
+numpy ½µ¼¶
+I was able to solve this with :
+sudo pip3 uninstall numpy
+pip install numpy==1.14.5
