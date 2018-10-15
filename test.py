@@ -1,7 +1,10 @@
-str = "14102100"
+import datetime
+str = "14102800"
 print(str[6:8])
 print(str[4:6])
-year = str[0:2]
-month = str[2:4]
-day = str[4:6]
-print(year + month + day)
+year = int(str[0:2])
+month = int(str[2:4])
+day = int(str[4:6])
+dt = datetime.date(year,month,day)
+weekday = dt.weekday()
+print(weekday)

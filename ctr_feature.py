@@ -17,12 +17,18 @@ result = df[["C14","C15","C16","C17","C18","C19","C20","C21"]].describe()
 with open("train_sample_describe.csv","w") as f:
     pd.SparseDataFrame(result).to_csv(f)
 '''
-def getweekday(date):
+def getweekday(x):
     '''
     :param date: YYMMDD
     :return: weekday
     '''
-    year = str(date)[0:]
+    sdt = str(x)
+    year = int(sdt[0:2])
+    month = int(sdt[2:4])
+    day = int(sdt[4:6])
+    dt = datetime.date(year, month, day)
+    weekday = dt.weekday()
+    return weekday
 df.info()
 
 print(df["click"].mean())
@@ -71,5 +77,5 @@ df["size"] = df["C15"].str.cat(df["C16"],sep="_")
 #将hour列拆分为
 df["hour1"] = df["hour"].map(lambda x:str(x)[6:8])
 df["day"] = df["hour"].map(lambda x:str(x)[4:6])
-
+df["weekday"] = df["hour"].map(lambda x:getweekday(x))
 print(df.head())
