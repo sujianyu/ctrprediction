@@ -3,7 +3,9 @@
 
 import numpy as np
 import pandas as pd
-import sys,os
+import os
+import seaborn as sns
+import matplotlib.pyplot as plt
 datapath = "."
 trainfile = os.path.join(datapath ,"train_sample.csv")
 
@@ -17,6 +19,8 @@ print(df["click"].mean())
 
 group = df["click"].groupby(df["device_type"])
 print(group.mean())
-
+print(df["C1"].value_counts())
 print(df["C15"].value_counts())
 print(df["C16"].value_counts())
+
+x_train = df.drop(["id","click"],axis = 1)
