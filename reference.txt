@@ -3,6 +3,10 @@ http://techblog.youdao.com/wp-content/uploads/2015/03/Avazu-CTR-Prediction.pdf
 http://www.danniguo.com/index.php/archives/155/
 
 https://blog.csdn.net/zc02051126/article/details/54379244
+CTR 预估之 FM
+https://juejin.im/entry/5a6045456fb9a01cb80fc88e
+一文读懂FM算法优势并用python实现（附代码）
+http://www.qingpingshan.com/m/view.php?aid=369686
 
 numpy 降级
 I was able to solve this with :
