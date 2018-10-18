@@ -15,9 +15,9 @@ df = pd.read_csv(trainfile,chunksize=100000)
 '''
 count  = 0
 index = 0
-with open("train_sample.csv","a") as samplefile:
+with open("train_sample2.csv","a") as samplefile:
     for chunk in df:
-        sample = chunk.sample(n=None,frac=0.10,axis=0)
+        sample = chunk.sample(n=None,frac=0.010,axis=0)
         sample["id"] = sample["id"].apply(lambda x: '{:.0f}'.format(x))
         if index==0:
             sample.to_csv(samplefile, index=False, header=True)
@@ -26,14 +26,7 @@ with open("train_sample.csv","a") as samplefile:
         index = index + 1
         print(index)
         #print(chunk.columns)
-        '''
-        columns = chunk.columns
-        for col in columns:
-            print(col)
-        print(chunk.describe())
-        #train = chunk.dropna()
-        #train = chunk.drop_duplicates()
-        '''
+
         count = count + chunk.shape[0]
 
 print(count)

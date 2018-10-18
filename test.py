@@ -1,4 +1,6 @@
 import datetime
+import xlearn as xl
+xl.hello()
 str = "14102800"
 print(str[6:8])
 print(str[4:6])

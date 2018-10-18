@@ -7,6 +7,14 @@ CTR 预估之 FM
 https://juejin.im/entry/5a6045456fb9a01cb80fc88e
 一文读懂FM算法优势并用python实现（附代码）
 http://www.qingpingshan.com/m/view.php?aid=369686
+xLearn
+https://xlearn-doc-cn.readthedocs.io/en/latest/index.html
+https://github.com/aksnzhy/xlearn
+
+FFM代码实现
+https://www.cnblogs.com/zhangchaoyang/articles/8410719.html
+GBDT、FM、FFM和DNN融合构建广告点击率预测模型
+http://www.sohu.com/a/254213132_787107
 
 numpy 降级
 I was able to solve this with :

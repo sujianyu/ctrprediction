@@ -9,7 +9,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 datapath = "."
 trainfile = os.path.join(datapath ,"train_sample.csv")
-
+output = "output"
 df = pd.read_csv(trainfile,dtype={"C15":str,"C16":str})
 '''
 result = df[["C14","C15","C16","C17","C18","C19","C20","C21"]].describe()
@@ -30,6 +30,7 @@ def getweekday(x):
     weekday = dt.weekday()
     return weekday
 df.info()
+'''
 
 print(df["click"].mean())
 print("################")
@@ -54,7 +55,7 @@ print("################")
 print(df["device_model"].value_counts())
 print("################")
 print(df["device_type"].value_counts())
-print("################")
+print("#########group by column #######")
 group = df["click"].groupby(df["device_type"])
 print(group.mean())
 print("################")
@@ -68,15 +69,18 @@ print(df["C19"].value_counts())
 print(df["C20"].value_counts())
 print(df["C21"].value_counts())
 print("################")
-y_train = df["click"]
-df = df.drop(["id","click"],axis=1)
-#df[["C15","C16"]] = df[["C15","C16"]].astype(str)
-#df["C16"].apply(str)
-print(df.info())
+'''
 #建立新的特征列
+
 df["size"] = df["C15"].str.cat(df["C16"],sep="_")
 #将hour列拆分为
 df["hour1"] = df["hour"].map(lambda x:str(x)[6:8])
 df["day"] = df["hour"].map(lambda x:str(x)[4:6])
 df["weekday"] = df["hour"].map(lambda x:getweekday(x))
+
+df = df.drop(["id","site_id","app_id","hour","C15","C16"],axis=1)
 #生成新的数据集
+train_new =os.path.join(output, "train_new.csv")
+print(train_new)
+with open(train_new,"w") as newtrain:
+    df.to_csv(newtrain,index=False,header=True)
