@@ -42,7 +42,7 @@ df = df.drop(["id", "hour", "C15", "C16"], axis=1)
 param = {'max_depth':15, 'eta':.02, 'objective':'binary:logistic', 'verbose':0,
          'subsample':1.0, 'min_child_weight':50, 'gamma':0,
          'nthread': 4, 'colsample_bytree':.5, 'base_score':0.16, 'seed': 999}
-num_round = 300
+num_round = 5
 y_train = df["click"]
 df = df.drop(["click"],axis=1)
 
@@ -65,10 +65,9 @@ y_train = dtrain.get_label()
 train_accuracy = accuracy_score(y_train, train_predictions)
 print ("Train Accuary: %.2f%%" % (train_accuracy * 100.0))
 # 显示重要特征
-#plot_importance(bst)
-#plt.show()
+plot_importance(bst)
+plt.show()
 #得到新特征
-
 x_train_feature = bst.predict(dtrain,pred_leaf=True)
 new_feature = DataFrame(x_train_feature)
 print(new_feature.shape)
@@ -83,4 +82,13 @@ print(new_feature_onehot.shape)
 # 定义LR模型
 lr = LogisticRegression()
 lr.fit(new_feature_onehot,y_train)
-y_pred_xgblr1 = lr.predict_proba(new_feature_onehot)
+y_pred_xgblr1_proba = lr.predict_proba(new_feature_onehot)
+y_pred_xgblr = lr.predict(new_feature_onehot)
+#print(y_pred_xgblr)
+total = len(y_train)
+correct = 0
+for index in range(total):
+    if y_train[index] == y_pred_xgblr[index]:
+        correct += 1
+#print(y_pred_xgblr1_proba)
+print("XGB _+ LR :",total,correct,correct * 1.0 /total)
