@@ -3,14 +3,18 @@
 
 import numpy as np
 import pandas as pd
+from pandas import DataFrame
 import sys,os
 import xgboost as xgb
 import datetime
+from  sklearn import metrics
 from sklearn import preprocessing
+from sklearn.preprocessing import OneHotEncoder
 from xgboost import plot_importance
 from matplotlib import pyplot as plt
 # 计算分类正确率
 from sklearn.metrics import accuracy_score
+from sklearn.linear_model import LogisticRegression
 def getweekday(x):
     '''
     :param x: YYMMDD
@@ -25,7 +29,7 @@ def getweekday(x):
     return weekday
 
 datapath = "."
-trainfile = os.path.join(datapath ,"train_sample.csv")
+trainfile = os.path.join(datapath ,"train_sample2.csv")
 df = pd.read_csv(trainfile,dtype={"C15":str,"C16":str})
 df["size"] = df["C15"].str.cat(df["C16"], sep="_")
 # 将hour列拆分为
@@ -38,7 +42,7 @@ df = df.drop(["id", "hour", "C15", "C16"], axis=1)
 param = {'max_depth':15, 'eta':.02, 'objective':'binary:logistic', 'verbose':0,
          'subsample':1.0, 'min_child_weight':50, 'gamma':0,
          'nthread': 4, 'colsample_bytree':.5, 'base_score':0.16, 'seed': 999}
-num_round = 4
+num_round = 300
 y_train = df["click"]
 df = df.drop(["click"],axis=1)
 
@@ -51,12 +55,32 @@ print(X_train)
 dtrain = xgb.DMatrix(X_train,y_train)
 
 bst = xgb.train(param, dtrain, num_round)
-train_preds = bst.predict(dtrain)
+#pred_leaf=True,
+train_preds = bst.predict(dtrain,pred_leaf=False)
+print(train_preds.shape)
+
+
 train_predictions = [round(value) for value in train_preds]
 y_train = dtrain.get_label()
 train_accuracy = accuracy_score(y_train, train_predictions)
 print ("Train Accuary: %.2f%%" % (train_accuracy * 100.0))
-
 # 显示重要特征
-plot_importance(bst)
-plt.show()
+#plot_importance(bst)
+#plt.show()
+#得到新特征
+
+x_train_feature = bst.predict(dtrain,pred_leaf=True)
+new_feature = DataFrame(x_train_feature)
+print(new_feature.shape)
+print(new_feature.head())
+
+#对新特征使用onehot编码
+enc = OneHotEncoder()
+new_feature_onehot = enc.fit_transform(new_feature).toarray()
+print(new_feature_onehot.shape)
+
+#进行LR预测
+# 定义LR模型
+lr = LogisticRegression()
+lr.fit(new_feature_onehot,y_train)
+y_pred_xgblr1 = lr.predict_proba(new_feature_onehot)
