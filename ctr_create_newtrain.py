@@ -8,7 +8,7 @@ import datetime
 datapath = "."
 outputpath = "output"
 #print(datapath)
-trainfile = os.path.join(datapath ,"train.csv")
+trainfile = os.path.join(datapath ,"train_sample2.csv")
 trainnewfile = os.path.join(outputpath,"train_new.csv")
 
 def getweekday(x):
@@ -34,8 +34,13 @@ with open(trainnewfile,"a") as trainnewfile:
         df["hour1"] = df["hour"].map(lambda x: str(x)[6:8])
         df["day"] = df["hour"].map(lambda x: str(x)[4:6])
         df["weekday"] = df["hour"].map(lambda x: getweekday(x))
+        df["site_id_domain_cat"] = df["site_id"]+ "_" + df["site_domain"] + "_" + df["site_category"]
+        df["app_id_domain_cat"] = df["app_id"] + "_" + df["app_domain"] + "_" + df["app_category"]
+        df["device_id_ip_mod"] = df["device_id"] + "_" + df["device_ip"] + "_" + df["device_model"]
 
-        df = df.drop(["id", "site_id", "app_id", "hour", "C15", "C16"], axis=1)
+
+        columns=["id", "site_id","site_domain","site_category", "app_id","app_domain","app_category", "hour", "C15", "C16"]
+        df = df.drop(columns, axis=1)
         if index==0:
             df.to_csv(trainnewfile, index=False, header=True)
         else:
