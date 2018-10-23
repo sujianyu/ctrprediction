@@ -16,6 +16,10 @@ https://www.cnblogs.com/zhangchaoyang/articles/8410719.html
 GBDT、FM、FFM和DNN融合构建广告点击率预测模型
 http://www.sohu.com/a/254213132_787107
 
+
+csv2libsvm
+https://github.com/zygmuntz/phraug/blob/master/csv2libsvm.py
+
 numpy 降级
 I was able to solve this with :
 sudo pip3 uninstall numpy
