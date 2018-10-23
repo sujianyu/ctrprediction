@@ -131,6 +131,12 @@ df_test = pd.read_csv(testfile)
 
 #写入结果文件中
 print("Write result to test file.")
+'''
+df_test_newfeature = create_feature(df_test)
+X_test = df_test.values
+
+bst.predict(X_test,pred_leaf=True)
+lr.fit()
 res = pd.read_csv("test_sample")
 y_pred  = [0]
 res["click"] = y_pred
@@ -138,3 +144,4 @@ outputfilename = os.path.join(datapath,"test_predict.csv")
 with open(outputfilename) as outputfile:
     res["id"] = res["id"].apply(lambda x: '{:.0f}'.format(x))
     res.to_csv(outputfile,index=False,header=True)
+'''

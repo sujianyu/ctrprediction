@@ -3,24 +3,28 @@ http://techblog.youdao.com/wp-content/uploads/2015/03/Avazu-CTR-Prediction.pdf
 http://www.danniguo.com/index.php/archives/155/
 
 https://blog.csdn.net/zc02051126/article/details/54379244
-CTR Ô¤¹ÀÖ® FM
+CTR é¢„ä¼°ä¹‹ FM
 https://juejin.im/entry/5a6045456fb9a01cb80fc88e
-Ò»ÎÄ¶Á¶®FMËã·¨ÓÅÊÆ²¢ÓÃpythonÊµÏÖ£¨¸½´úÂë£©
+ä¸€æ–‡è¯»æ‡‚FMç®—æ³•ä¼˜åŠ¿å¹¶ç”¨pythonå®ç°ï¼ˆé™„ä»£ç ï¼‰
 http://www.qingpingshan.com/m/view.php?aid=369686
 xLearn
 https://xlearn-doc-cn.readthedocs.io/en/latest/index.html
 https://github.com/aksnzhy/xlearn
 
-FFM´úÂëÊµÏÖ
+FFMä»£ç å®ç°
 https://www.cnblogs.com/zhangchaoyang/articles/8410719.html
-GBDT¡¢FM¡¢FFMºÍDNNÈÚºÏ¹¹½¨¹ã¸æµã»÷ÂÊÔ¤²âÄ£ĞÍ
+GBDTã€FMã€FFMå’ŒDNNèåˆæ„å»ºå¹¿å‘Šç‚¹å‡»ç‡é¢„æµ‹æ¨¡å‹
 http://www.sohu.com/a/254213132_787107
 
+XGBoost+LRèåˆçš„åŸç†å’Œç®€å•å®ç°
+https://zhuanlan.zhihu.com/p/42123341
 
-csv2libsvm
-https://github.com/zygmuntz/phraug/blob/master/csv2libsvm.py
+lightGBMçš„å¢é‡è¨“ç·´æ–¹æ³•
+https://github.com/zldeng/XgboostAndLR/blob/master/XGB_LR.py
 
-numpy ½µ¼¶
+https://www.smwenku.com/a/5b833b212b71771e35c1bcb8
+
+numpy é™çº§
 I was able to solve this with :
 sudo pip3 uninstall numpy
 pip install numpy==1.14.5
