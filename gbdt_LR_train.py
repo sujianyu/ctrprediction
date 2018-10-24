@@ -14,7 +14,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import log_loss
 from xgboost import plot_importance
 from matplotlib import pyplot as plt
+from sklearn.preprocessing import scale
 import joblib
+from sklearn.preprocessing import scale
+import gc
 # 计算分类正确率
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LogisticRegression
@@ -44,7 +47,7 @@ def create_feature(data):
     return data
 
 datapath = "."
-trainfile = os.path.join(datapath ,"train_sample2.csv")
+trainfile = os.path.join(datapath ,"train_sample.csv")
 
 df_train = pd.read_csv(trainfile,dtype={"C15":str,"C16":str})
 #df_test= pd.read_csv(testfile,dtype={"C15":str,"C16":str})
@@ -56,7 +59,7 @@ df_train = df_train.drop(["app_id","site_id","device_model"],axis=1)
 param = {'max_depth':15, 'eta':.02, 'objective':'binary:logistic', 'verbose':0,
          'subsample':1.0, 'min_child_weight':50, 'gamma':0,
          'nthread': 4, 'colsample_bytree':.5, 'base_score':0.16, 'seed': 999}
-num_round = 5
+num_round = 10
 y_all = df_train["click"]
 df_train = df_train.drop(["click"],axis=1)
 
@@ -66,15 +69,18 @@ columns_id = ["site_domain","site_category","app_domain","app_category","device_
 for columnname in columns_id:
     df_train[columnname]= le.fit_transform(df_train[columnname])
 
+columns = df_train.columns
+print(columns)
 X_all = df_train.values
-print(X_all.shape)
+#print(X_all.shape)
+#print(y_all)
 #划分数据集
 print("划分数据集")
 #x_train, x_val, y_train, y_val = train_test_split(X_all, y_all, test_size = 0.2, random_state = 2018)
 
-dtrain = xgb.DMatrix(X_all,y_all)
+dtrain = xgb.DMatrix(X_all,y_all,feature_names=columns)
 #dtest = xgb.DMatrix(x_val,y_val)
-bst = xgb.train(param, dtrain, num_round,early_stopping_rounds=10)
+bst = xgb.train(param, dtrain, num_round)
 #pred_leaf=True,
 '''
 
@@ -97,18 +103,22 @@ joblib.dump(bst,"xgb_ctr_joblib.dat")
 #得到新特征
 x_train_feature = bst.predict(dtrain,pred_leaf=True)
 #x_test_feature = bst.predict(dtest,pred_leaf=True)
-
-new_train_feature = DataFrame(x_train_feature)
+#新特征进行标准化
+x_train_feature_scale = scale(x_train_feature)
+print(x_train_feature_scale)
+#new_train_feature = DataFrame(x_train_feature_scale)
 #new_test_feature = DataFrame(x_test_feature)
-print(new_train_feature.shape)
-print(new_train_feature.head())
+print(x_train_feature_scale.shape)
+
+
 #对新特征使用onehot编码
 enc = OneHotEncoder()
-new_train_feature_onehot = enc.fit_transform(new_train_feature).toarray()
+#new_train_feature_onehot = enc.fit_transform(x_train_feature_scale).toarray()
 #new_test_feature_onehot = enc.fit_transform(new_test_feature).toarray()
-print(new_train_feature_onehot.shape)
+del x_train_feature
+gc.collect()
 #GBDT生成的特征划分数据集
-x_train_lr, x_val_lr, y_train_lr, y_val_lr = train_test_split(new_train_feature_onehot, y_all, test_size=0.2, random_state=2018)
+x_train_lr, x_val_lr, y_train_lr, y_val_lr = train_test_split(x_train_feature_scale, y_all, test_size=0.2, random_state=2018)
 #进行LR预测
 # 定义LR模型
 lr = LogisticRegression()
