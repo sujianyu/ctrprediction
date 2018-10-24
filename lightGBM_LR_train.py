@@ -17,7 +17,6 @@ from matplotlib import pyplot as plt
 from sklearn.preprocessing import scale
 import joblib
 from sklearn.preprocessing import scale
-from sklearn.decomposition import PCA
 import gc
 # 计算分类正确率
 from sklearn.metrics import accuracy_score
@@ -35,50 +34,32 @@ def getweekday(x):
     weekday = dt.weekday()
     return weekday
 
-def time_period(hour):
-    period = 0
-    hour = int(hour)
-    if hour>0 and hour <6:
-        period = 1
-    elif hour>=6 and hour<11 :
-        period = 2
-    elif hour>=11 and hour<13:
-        period = 3
-    elif hour>13 and hour<17:
-        period = 4
-    elif hour>=17 and hour<24:
-        period = 5
-    return period
-
 def create_feature(data):
     data["size"] = data["C15"].str.cat(data["C16"], sep="_")
     # 将hour列拆分为
     data["hour1"] = data["hour"].map(lambda x: str(x)[6:8])
     data["day"] = data["hour"].map(lambda x: str(x)[4:6])
     data["weekday"] = data["hour"].map(lambda x: getweekday(x))
-#    data["time_period"] = data["hour1"].map(lambda x:time_period(x))
     data["app_site_id"] = data["app_id"] + "_" + data["site_id"]
     data["app_site_id_model"] = data["app_site_id"] + "_" + data["device_model"]
     #此处可以考虑将组合特征的源特征删掉，对比效果
-    data = data.drop(["id", "hour"], axis=1)
+    data = data.drop(["id", "hour", "C15", "C16"], axis=1)
     return data
 
 datapath = "."
-trainfile = os.path.join(datapath ,"train_sample2.csv")
+trainfile = os.path.join(datapath ,"train_sample.csv")
 
-df_train = pd.read_csv(trainfile,dtype={"C15":str,"C16":str})
-#df_test= pd.read_csv(testfile,dtype={"C15":str,"C16":str})
+df_train = pd.read_csv(trainfile,chunksize=100000,dtype={"C15":str,"C16":str})
+
 df_train = create_feature(df_train)
-#df_test = create_feature(df_test)
-#删掉组合特征的原始特征，为了省内存
-#df_train = df_train.drop(["app_id","site_id","device_model"],axis=1)
 # specify parameters via map
 param = {'max_depth':15, 'eta':.02, 'objective':'binary:logistic', 'verbose':0,
          'subsample':1.0, 'min_child_weight':50, 'gamma':0,
          'nthread': 4, 'colsample_bytree':.5, 'base_score':0.16, 'seed': 999}
-num_round = 5
+num_round = 10
 y_all = df_train["click"]
-df_train = df_train.drop(["click","C15","C16"],axis=1)
+df_train = df_train.drop(["click"],axis=1)
+
 le = preprocessing.LabelEncoder()
 columns_id = ["app_id","site_id","device_model","site_domain","site_category","app_domain","app_category","device_id","device_ip","app_site_id","app_site_id_model","size"]
 
@@ -125,26 +106,16 @@ x_train_feature = bst.predict(dtrain,pred_leaf=True)
 #print(x_train_feature_scale)
 #new_train_feature = DataFrame(x_train_feature_scale)
 #new_test_feature = DataFrame(x_test_feature)
-print(x_train_feature.shape)
+#print(x_train_feature_scale.shape)
 
 
 #对新特征使用onehot编码
 enc = OneHotEncoder()
 x_train_feature_onehot = enc.fit_transform(x_train_feature).toarray()
-'''
-此处应该用PCA降维操作，限于内存不够大，只进行一般的标准化。
-'''
-#此处onehot，特征急剧增加，必须进行降维操作
-#设置PCA参数
-n_components = 0.75
-pca = PCA(n_components=n_components)
-x_train_feature_pca = pca.fit_transform(x_train_feature_onehot)
-print(x_train_feature_pca.shape)
-sys.exit(0)
 #new_test_feature_onehot = enc.fit_transform(new_test_feature).toarray()
+print(x_train_feature_onehot.shape)
 del x_train_feature
 gc.collect()
-print(x_train_feature_onehot.shape)
 #GBDT生成的特征划分数据集
 x_train_lr, x_val_lr, y_train_lr, y_val_lr = train_test_split(x_train_feature_onehot, y_train, test_size=0.2, random_state=2018)
 #进行LR预测
