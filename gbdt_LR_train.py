@@ -127,7 +127,6 @@ x_train_feature = bst.predict(dtrain,pred_leaf=True)
 #new_test_feature = DataFrame(x_test_feature)
 print(x_train_feature.shape)
 
-
 #对新特征使用onehot编码
 enc = OneHotEncoder()
 x_train_feature_onehot = enc.fit_transform(x_train_feature).toarray()

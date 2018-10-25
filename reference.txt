@@ -1,4 +1,4 @@
-http://techblog.youdao.com/wp-content/uploads/2015/03/Avazu-CTR-Prediction.pdf
+﻿http://techblog.youdao.com/wp-content/uploads/2015/03/Avazu-CTR-Prediction.pdf
 
 http://www.danniguo.com/index.php/archives/155/
 
@@ -24,7 +24,17 @@ https://github.com/zldeng/XgboostAndLR/blob/master/XGB_LR.py
 
 https://www.smwenku.com/a/5b833b212b71771e35c1bcb8
 
+How to Check-Point Deep Learning Models in Keras
+https://machinelearningmastery.com/check-point-deep-learning-models-keras/
+
+Kaggle实战——点击率预估
+https://zhuanlan.zhihu.com/p/32500652
+
 numpy 降级
 I was able to solve this with :
 sudo pip3 uninstall numpy
 pip install numpy==1.14.5
+
+tindymind 上遇到DISPLAY错误，解决方法：
+https://www.cnblogs.com/bymo/p/7447409.html
+plt.switch_backend('agg')

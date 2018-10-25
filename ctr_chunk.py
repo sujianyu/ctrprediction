@@ -16,7 +16,7 @@ while loop:
         chunknum = chunknum + 1
         print(chunknum)
         chunk = reader.get_chunk(chunksize)
-        chunks.append(chunk)
+        #chunks.append(chunk)
     except StopIteration:
             loop = False
             print("Iteration is stopped.")

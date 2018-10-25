@@ -6,6 +6,7 @@ import pandas as pd
 from pandas import DataFrame
 import sys,os
 import xgboost as xgb
+import lightgbm as lgb
 import datetime
 from  sklearn import metrics
 from sklearn import preprocessing
@@ -16,7 +17,6 @@ from xgboost import plot_importance
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import scale
 import joblib
-from sklearn.preprocessing import scale
 import gc
 # 计算分类正确率
 from sklearn.metrics import accuracy_score
@@ -47,111 +47,51 @@ def create_feature(data):
     return data
 
 datapath = "."
+output = "output"
 trainfile = os.path.join(datapath ,"train_sample.csv")
 
-df_train = pd.read_csv(trainfile,chunksize=100000,dtype={"C15":str,"C16":str})
+df_reader = pd.read_csv(trainfile,chunksize=300000,dtype={"C15":str,"C16":str})
+gbm = None
+params = {
+        'task': 'train',
+        'application': 'regression',
+        'boosting_type': 'gbdt',
+        'learning_rate': 0.2,
+        'num_leaves': 31,
+        'tree_learner': 'serial',
+        'min_data_in_leaf': 100,
+        'metric': ['l1','l2','rmse'],  # l1:mae, l2:mse
+        'max_bin': 255,
+        'num_trees': 300
+    }
+i=1
+for df_train in df_reader:
+    df_train = create_feature(df_train)
+    y_all = df_train["click"]
+    df_train = df_train.drop(["click"],axis=1)
+    #lightgbm 模型可以对类别型特征
+    columns = df_train.columns.tolist()
+    print(columns)
+    X_all = df_train.values
+    #print(X_all.shape)
+    #print(y_all)
+    #划分数据集
+    print("split dataset")
+    x_train, x_val, y_train, y_val = train_test_split(X_all, y_all, test_size = 0.2, random_state = 2018)
+    lgb_train = lgb.Dataset(x_train,y_train)
+    lgb_eval = lgb.Dataset(x_val,y_val)
+    gbm = lgb.train(params,
+                    lgb_train,
+                    num_boost_round=1000,
+                    valid_sets=lgb_eval,
+                    init_model=gbm,  # 如果不为空，就是继续上次的训练。
+                    feature_name=columns,
+                    early_stopping_rounds=10,
+                    verbose_eval=False,
+                    keep_training_booster=True)  # 增量训练
+    score_train = dict([(s[1],s[2]) for s in gbm.eval_train()])
+    score_valid = dict([(s[1],s[2]) for s in gbm.eval_valid()])
+    print('mae=%.4f, mse=%.4f, rmse=%.4f' % (score_train['l1'], score_train['l2'], score_train['rmse']))
+    print('mae=%.4f, mse=%.4f, rmse=%.4f' % (score_valid['l1'], score_valid['l2'], score_valid['rmse']))
+    i+=1
 
-df_train = create_feature(df_train)
-# specify parameters via map
-param = {'max_depth':15, 'eta':.02, 'objective':'binary:logistic', 'verbose':0,
-         'subsample':1.0, 'min_child_weight':50, 'gamma':0,
-         'nthread': 4, 'colsample_bytree':.5, 'base_score':0.16, 'seed': 999}
-num_round = 10
-y_all = df_train["click"]
-df_train = df_train.drop(["click"],axis=1)
-
-le = preprocessing.LabelEncoder()
-columns_id = ["app_id","site_id","device_model","site_domain","site_category","app_domain","app_category","device_id","device_ip","app_site_id","app_site_id_model","size"]
-
-for columnname in columns_id:
-    df_train[columnname]= le.fit_transform(df_train[columnname])
-
-columns = df_train.columns
-print(columns)
-X_all = df_train.values
-#print(X_all.shape)
-#print(y_all)
-#划分数据集
-print("划分数据集")
-x_train, x_val, y_train, y_val = train_test_split(X_all, y_all, test_size = 0.2, random_state = 2018)
-
-dtrain = xgb.DMatrix(x_train, y_train, feature_names=columns)
-dtest = xgb.DMatrix(x_val,y_val,feature_names=columns)
-watchlist1 = [(dtrain,'train'),(dtest,'test')]
-bst = xgb.train(param, dtrain, num_round,early_stopping_rounds=10,evals=watchlist1)
-#pred_leaf=True,
-'''
-
-test_preds = bst.predict(dtest,pred_leaf=False)
-print(test_preds.shape)
-
-test_predictions = [round(value) for value in test_preds]
-y_test = dtest.get_label()
-train_accuracy = accuracy_score(y_test, test_predictions)
-print ("Train Accuary: %.2f%%" % (train_accuracy * 100.0))
-'''
-# 显示重要特征
-plot_importance(bst)
-plt.savefig("feature_importtance.png")
-#保存xgboost模型数据
-print("saving xgboost model")
-joblib.dump(bst,"xgb_ctr_joblib.dat")
-
-#plt.show()
-#得到新特征
-x_train_feature = bst.predict(dtrain,pred_leaf=True)
-#x_test_feature = bst.predict(dtest,pred_leaf=True)
-#新特征进行标准化
-#x_train_feature_scale = scale(x_train_feature)
-#print(x_train_feature_scale)
-#new_train_feature = DataFrame(x_train_feature_scale)
-#new_test_feature = DataFrame(x_test_feature)
-#print(x_train_feature_scale.shape)
-
-
-#对新特征使用onehot编码
-enc = OneHotEncoder()
-x_train_feature_onehot = enc.fit_transform(x_train_feature).toarray()
-#new_test_feature_onehot = enc.fit_transform(new_test_feature).toarray()
-print(x_train_feature_onehot.shape)
-del x_train_feature
-gc.collect()
-#GBDT生成的特征划分数据集
-x_train_lr, x_val_lr, y_train_lr, y_val_lr = train_test_split(x_train_feature_onehot, y_train, test_size=0.2, random_state=2018)
-#进行LR预测
-# 定义LR模型
-lr = LogisticRegression()
-lr.fit(x_train_lr,y_train_lr)
-
-y_pred_xgblr1_proba = lr.predict_proba(x_train_lr)
-y_pred_xgblr = lr.predict(x_train_lr)
-tr_logloss = log_loss(y_train_lr,y_pred_xgblr1_proba[:,1])
-print("train logloss:",tr_logloss)
-val_logloss = log_loss(y_val_lr,lr.predict_proba(x_val_lr)[:,1])
-print("validate logloss:",val_logloss)
-#print(y_pred_xgblr)
-#保存logRegression
-print("saving LogRegression Model data")
-joblib.dump(lr,"ctr_lr_joblib.dat")
-'''
-#开始预测
-print("用测试集数据进行预测。")
-testfile = os.path.join(datapath,"test_sample")
-df_test = pd.read_csv(testfile)
-
-#写入结果文件中
-#print("Write result to test file.")
-
-df_test_newfeature = create_feature(df_test)
-X_test = df_test.values
-
-bst.predict(X_test,pred_leaf=True)
-lr.fit()
-res = pd.read_csv("test_sample")
-y_pred  = [0]
-res["click"] = y_pred
-outputfilename = os.path.join(datapath,"test_predict.csv")
-with open(outputfilename) as outputfile:
-    res["id"] = res["id"].apply(lambda x: '{:.0f}'.format(x))
-    res.to_csv(outputfile,index=False,header=True)
-'''
