@@ -21,34 +21,17 @@ import gc
 # 计算分类正确率
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LogisticRegression
-def getweekday(x):
-    '''
-    :param x: YYMMDD
-    :return: weekday
-    '''
-    sdt = str(x)
-    year = int(sdt[0:2])
-    month = int(sdt[2:4])
-    day = int(sdt[4:6])
-    dt = datetime.date(year, month, day)
-    weekday = dt.weekday()
-    return weekday
+from tinyenv.flags import flags
+import argparse
+parser = argparse.ArgumentParser()
 
-def create_feature(data):
-    data["size"] = data["C15"].str.cat(data["C16"], sep="_")
-    # 将hour列拆分为
-    data["hour1"] = data["hour"].map(lambda x: str(x)[6:8])
-    data["day"] = data["hour"].map(lambda x: str(x)[4:6])
-    data["weekday"] = data["hour"].map(lambda x: getweekday(x))
-    data["app_site_id"] = data["app_id"] + "_" + data["site_id"]
-    data["app_site_id_model"] = data["app_site_id"] + "_" + data["device_model"]
-    #此处可以考虑将组合特征的源特征删掉，对比效果
-    data = data.drop(["id", "hour", "C15", "C16"], axis=1)
-    return data
-
+FLAGS = flags()
+print(FLAGS.iterations)
+sys.exit(0)
+new_featurefilename = "new_featrue.csv"
 datapath = "."
 output = "output"
-trainfile = os.path.join(datapath ,"train_sample.csv")
+new_featurefile = os.path.join(output ,new_featurefilename)
 
 df_reader = pd.read_csv(trainfile,chunksize=300000,dtype={"C15":str,"C16":str})
 gbm = None
