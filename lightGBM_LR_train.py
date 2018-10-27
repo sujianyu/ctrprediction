@@ -30,13 +30,15 @@ new_featurefile = os.path.join(output ,new_featurefilename)
 
 df_reader = pd.read_csv(new_featurefile,chunksize=100000)
 gbm = None
+num_leaf = 36
 params = {
         'task': 'train',
         'application': 'regression',
         'boosting_type': 'gbdt',
         'learning_rate': 0.2,
-        'num_leaves': 31,
-        'tree_learner': 'serial',
+        'num_leaves': num_leaf,
+        'num_threads': 4,
+        'tree_learner': 'feature',
         'min_data_in_leaf': 100,
         'metric': ['l1','l2','rmse'],  # l1:mae, l2:mse
         'max_bin': 255,
@@ -54,9 +56,11 @@ for df_train in df_reader:
     #print(y_all)
     #划分数据集
     print("split dataset")
+
     x_train, x_val, y_train, y_val = train_test_split(X_all, y_all, test_size = 0.2, random_state = 2018)
     lgb_train = lgb.Dataset(x_train,y_train)
     lgb_eval = lgb.Dataset(x_val,y_val)
+
     gbm = lgb.train(params,
                     lgb_train,
                     num_boost_round=100,
@@ -70,10 +74,25 @@ for df_train in df_reader:
     score_valid = dict([(s[1],s[2]) for s in gbm.eval_valid()])
     print('train:mae=%.4f, mse=%.4f, rmse=%.4f' % (score_train['l1'], score_train['l2'], score_train['rmse']))
     print('valid:mae=%.4f, mse=%.4f, rmse=%.4f' % (score_valid['l1'], score_valid['l2'], score_valid['rmse']))
+    del x_train
+    del x_val
+    del y_train
+    del y_val
     del lgb_train
     del lgb_eval
     gc.collect()
     lgb_all = lgb.Dataset(X_all,y_all)
     y_pred = gbm.predict(X_all,pred_leaf=True)
+    print(len(y_pred), len(y_pred[0]))
+    sys.exit(0)
+    transformed_testing_matrix = np.zeros([len(y_pred), len(y_pred[0]) * num_leaf], dtype=np.int64)
+    for i in range(0, len(y_pred)):
+        temp = np.arange(len(y_pred[0])) * num_leaf - 1 + np.array(y_pred[i])
+        transformed_testing_matrix[i][temp] += 1
+    print('Calculate feature importances...')
+    # feature importances
+    print('Feature importances:', list(gbm.feature_importance()))
+    print('Feature importances:', list(gbm.feature_importance("gain")))
+
     i+=1
 
