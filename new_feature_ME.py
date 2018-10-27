@@ -22,7 +22,7 @@ def getweekday(x):
     return weekday
 
 def create_feature(data):
-    data["size"] = data["C15"]* data["C16"]
+    data["size"] = data["C15"] * data["C16"]
     # 将hour列拆分为
     data["hour1"] = data["hour"].map(lambda x: str(x)[6:8])
     data["day"] = data["hour"].map(lambda x: str(x)[4:6])
@@ -34,7 +34,7 @@ def create_feature(data):
     data = data.drop(["hour"], axis=1)
     return data
 if __name__ == "__main__":
-    train_file_name = "train_sample2.csv"
+    train_file_name = "train_sample.csv"
     data_path = "."
     output = "output"
     df = pd.read_csv(os.path.join(data_path,train_file_name))
