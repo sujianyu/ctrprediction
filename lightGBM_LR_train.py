@@ -21,19 +21,14 @@ import gc
 # 计算分类正确率
 from sklearn.metrics import accuracy_score
 from sklearn.linear_model import LogisticRegression
-from tinyenv.flags import flags
-import argparse
-parser = argparse.ArgumentParser()
+from sklearn.linear_model import SGDClassifier
 
-FLAGS = flags()
-print(FLAGS.iterations)
-sys.exit(0)
 new_featurefilename = "new_featrue.csv"
 datapath = "."
 output = "output"
 new_featurefile = os.path.join(output ,new_featurefilename)
 
-df_reader = pd.read_csv(trainfile,chunksize=300000,dtype={"C15":str,"C16":str})
+df_reader = pd.read_csv(new_featurefile,chunksize=100000)
 gbm = None
 params = {
         'task': 'train',
@@ -49,7 +44,6 @@ params = {
     }
 i=1
 for df_train in df_reader:
-    df_train = create_feature(df_train)
     y_all = df_train["click"]
     df_train = df_train.drop(["click"],axis=1)
     #lightgbm 模型可以对类别型特征
@@ -65,7 +59,7 @@ for df_train in df_reader:
     lgb_eval = lgb.Dataset(x_val,y_val)
     gbm = lgb.train(params,
                     lgb_train,
-                    num_boost_round=1000,
+                    num_boost_round=100,
                     valid_sets=lgb_eval,
                     init_model=gbm,  # 如果不为空，就是继续上次的训练。
                     feature_name=columns,
@@ -74,7 +68,12 @@ for df_train in df_reader:
                     keep_training_booster=True)  # 增量训练
     score_train = dict([(s[1],s[2]) for s in gbm.eval_train()])
     score_valid = dict([(s[1],s[2]) for s in gbm.eval_valid()])
-    print('mae=%.4f, mse=%.4f, rmse=%.4f' % (score_train['l1'], score_train['l2'], score_train['rmse']))
-    print('mae=%.4f, mse=%.4f, rmse=%.4f' % (score_valid['l1'], score_valid['l2'], score_valid['rmse']))
+    print('train:mae=%.4f, mse=%.4f, rmse=%.4f' % (score_train['l1'], score_train['l2'], score_train['rmse']))
+    print('valid:mae=%.4f, mse=%.4f, rmse=%.4f' % (score_valid['l1'], score_valid['l2'], score_valid['rmse']))
+    del lgb_train
+    del lgb_eval
+    gc.collect()
+    lgb_all = lgb.Dataset(X_all,y_all)
+    y_pred = gbm.predict(X_all,pred_leaf=True)
     i+=1
 

@@ -51,7 +51,8 @@ def time_period(hour):
     return period
 
 def create_feature(data):
-    data["size"] = data["C15"].str.cat(data["C16"], sep="_")
+    #size新特征改为乘积，表示广告大小。
+    data["size"] = data["C15"] * data["C16"]
     # 将hour列拆分为
     data["hour1"] = data["hour"].map(lambda x: str(x)[6:8])
     data["day"] = data["hour"].map(lambda x: str(x)[4:6])
@@ -66,7 +67,7 @@ def create_feature(data):
 datapath = "."
 trainfile = os.path.join(datapath ,"train_sample2.csv")
 
-df_train = pd.read_csv(trainfile,dtype={"C15":str,"C16":str})
+df_train = pd.read_csv(trainfile)
 #df_test= pd.read_csv(testfile,dtype={"C15":str,"C16":str})
 df_train = create_feature(df_train)
 #df_test = create_feature(df_test)
@@ -118,6 +119,10 @@ joblib.dump(bst,"xgb_ctr_joblib.dat")
 
 #plt.show()
 #得到新特征
+del dtrain
+del dtest
+gc.collect()
+dtrain = xgb.DMatrix(X_all,feature_names=columns)
 x_train_feature = bst.predict(dtrain,pred_leaf=True)
 #x_test_feature = bst.predict(dtest,pred_leaf=True)
 #新特征进行标准化
