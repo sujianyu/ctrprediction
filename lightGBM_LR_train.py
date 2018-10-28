@@ -15,7 +15,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import log_loss
 from xgboost import plot_importance
 from matplotlib import pyplot as plt
-from sklearn.preprocessing import scale
 import joblib
 import gc
 # 计算分类正确率
@@ -84,7 +83,7 @@ for df_train in df_reader:
     lgb_all = lgb.Dataset(X_all,y_all)
     y_pred = gbm.predict(X_all,pred_leaf=True)
     print(len(y_pred), len(y_pred[0]))
-    sys.exit(0)
+
     transformed_testing_matrix = np.zeros([len(y_pred), len(y_pred[0]) * num_leaf], dtype=np.int64)
     for i in range(0, len(y_pred)):
         temp = np.arange(len(y_pred[0])) * num_leaf - 1 + np.array(y_pred[i])
@@ -93,6 +92,9 @@ for df_train in df_reader:
     # feature importances
     print('Feature importances:', list(gbm.feature_importance()))
     print('Feature importances:', list(gbm.feature_importance("gain")))
+
+    print("Starting LR")
+
 
     i+=1
 
