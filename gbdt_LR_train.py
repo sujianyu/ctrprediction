@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+from scipy import sparse
 import pandas as pd
 from pandas import DataFrame
 import sys,os
@@ -62,8 +63,6 @@ def create_feature(data):
     data["time_period"] = data["hour1"].map(lambda x:time_period(x))
     data["app_site_id"] = data["app_id"] + "_" + data["site_id"]
     data["app_site_id_model"] = data["app_site_id"] + "_" + data["device_model"]
-    #此处可以考虑将组合特征的源特征删掉，对比效果
-    data = data.drop(["id", "hour"], axis=1)
     return data
 
 sample_datapath = "/data/sujianyu/ctrsample/"
@@ -75,33 +74,36 @@ output = "/output"
 output = "output"
 sample_datapath = "./data"
 num_round = 5
+n_components = 0.75
 #trainfile = os.path.join(train_datapath ,train_filename)
 trainfile = os.path.join(sample_datapath,sample_filename)
 df_train = pd.read_csv(trainfile)
-#df_test= pd.read_csv(testfile,dtype={"C15":str,"C16":str})
 df_train = create_feature(df_train)
-#df_test = create_feature(df_test)
-#删掉组合特征的原始特征，为了省内存
-#df_train = df_train.drop(["app_id","site_id","device_model"],axis=1)
+columns = df_train.columns
+print(columns)
 # specify parameters via map
 param = {'max_depth':15, 'eta':.02, 'objective':'binary:logistic', 'verbose':0,
          'subsample':1.0, 'min_child_weight':50, 'gamma':0,
          'nthread': 4, 'colsample_bytree':.5, 'base_score':0.16, 'seed': 999}
 
 y_all = df_train["click"]
-df_train = df_train.drop(["click","C15","C16"],axis=1)
-le = preprocessing.LabelEncoder()
-me = MeanEncoder()
+x_train = df_train.drop(["id","click","hour","C15","C16"],axis=1)
+#le = preprocessing.LabelEncoder()
 
-columns_id = ["site_id","site_domain","site_id","site_category","app_id","app_domain","app_category","device_id","device_ip","device_model","app_site_id","app_site_id_model","C20","C21"]
-columns_category_id = ["C1","banner_pos","device_type","device_conn_type","C18"]
-for columnname in columns_id:
-    df_train[columnname]= le.fit_transform(df_train[columnname])
-
-columns = df_train.columns
-print(columns)
-X_all = df_train.values
-#print(X_all.shape)
+columns_me_id = ["site_id","site_domain","site_category","app_id","app_domain","app_category","device_id","device_ip","device_model","C14","C17","C19","C20","C21","hour1","app_site_id","app_site_id_model"]
+columns_onehot_id = ["C1","banner_pos","device_type","device_conn_type","C18","size","time_period","day","weekday"]
+me = MeanEncoder(columns_me_id,target_type='classification')
+enc = OneHotEncoder()
+pca = PCA(n_components=n_components)
+x_onehot = df_train[columns_onehot_id]
+x_me = df_train[columns_me_id]
+x_train_onehot = enc.fit_transform(x_onehot)
+x_train_me = me.fit_transform(x_me,y_all).values
+print(x_train_onehot.shape)
+print(x_train_me.shape)
+X_all = sparse.hstack((x_train_onehot,x_train_me))
+print(X_all)
+sys.exit(0)
 #print(y_all)
 #划分数据集
 print("split dataset.")
@@ -165,8 +167,8 @@ df_train_feature = pd.data
 #此处onehot，特征急剧增加，必须进行降维操作
 #设置PCA参数
 print("Run PCA")
-n_components = 0.75
-pca = PCA(n_components=n_components)
+
+
 x_train_feature_pca = pca.fit_transform(x_train_feature_onehot)
 print(x_train_feature_pca.shape)
 print("Validate PCA")
