@@ -1,0 +1,73 @@
+﻿http://techblog.youdao.com/wp-content/uploads/2015/03/Avazu-CTR-Prediction.pdf
+
+http://www.danniguo.com/index.php/archives/155/
+
+https://blog.csdn.net/zc02051126/article/details/54379244
+CTR 预估之 FM
+https://juejin.im/entry/5a6045456fb9a01cb80fc88e
+一文读懂FM算法优势并用python实现（附代码）
+http://www.qingpingshan.com/m/view.php?aid=369686
+xLearn
+https://xlearn-doc-cn.readthedocs.io/en/latest/index.html
+https://github.com/aksnzhy/xlearn
+
+FFM代码实现
+https://www.cnblogs.com/zhangchaoyang/articles/8410719.html
+GBDT、FM、FFM和DNN融合构建广告点击率预测模型
+http://www.sohu.com/a/254213132_787107
+
+XGBoost+LR融合的原理和简单实现
+https://zhuanlan.zhihu.com/p/42123341
+
+lightGBM的增量訓練方法
+https://github.com/zldeng/XgboostAndLR/blob/master/XGB_LR.py
+
+https://www.smwenku.com/a/5b833b212b71771e35c1bcb8
+
+How to Check-Point Deep Learning Models in Keras
+https://machinelearningmastery.com/check-point-deep-learning-models-keras/
+
+Kaggle实战——点击率预估
+https://zhuanlan.zhihu.com/p/32500652
+
+low-cardinality categorical attributes
+http://www.jiangdongzml.com/2018/01/31/Catergorical_Attributes/
+
+numpy 降级
+I was able to solve this with :
+sudo pip3 uninstall numpy
+pip install numpy==1.14.5
+
+tindymind 上遇到DISPLAY错误，解决方法：
+https://www.cnblogs.com/bymo/p/7447409.html
+plt.switch_backend('agg')
+
+机器学习综合代码
+http://www.zeroyx.com/index.php?r=site/art&id=17&title_id=99
+
+
+MeanEncoder
+def procdess_display_address_train_test(df_train, y_train, df_test):
+    n_train_samples = len(df_train.index)    
+    df_train_test = pd.concat((df_train, df_test), axis=0)
+
+    lb = LabelEncoder()
+    lb.fit(list(df_train_test['display_address'].values))
+    df_train_test ['display_address'] = lb.transform(list(df_train_test['display_address'].values))
+    
+    #import pdb
+    #pdb.set_trace()
+    me = MeanEncoder(['display_address'], target_type='classification')
+    df_train_test = me.fit_transform(df_train_test, y_train)
+
+    df_train_test.drop(['display_address'], axis=1,inplace = True)
+    
+    df_train = df_train_test.iloc[:n_train_samples, :]
+    df_test = df_train_test.iloc[n_train_samples:, :]
+    
+    return df_train, df_test
+    
+    
+The Brain：http://www.thebrain.com.cn/
+qing10:24:29
+GraphLab Create
