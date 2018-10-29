@@ -57,8 +57,11 @@ def time_period(hour):
 def create_feature(data):
     data["size"] = data["C15"] * data["C16"]
     # 将hour列拆分为
-    data["hour1"] = data["hour"].map(lambda x: str(x)[6:8])
-    data["day"] = data["hour"].map(lambda x: str(x)[4:6])
+    data["hour1"] = np.round(data.hour % 100)
+    data["day"] = np.round(data.hour % 10000 / 100)
+    data['day_hour'] = (data.day.values - 21) * 24 + data.hour1.values
+    data['day_hour_prev'] = data['day_hour'] - 1
+    data['day_hour_next'] = data['day_hour'] + 1
     data["weekday"] = data["hour"].map(lambda x: getweekday(x))
     data["time_period"] = data["hour1"].map(lambda x:time_period(x))
     data["app_site_id"] = data["app_id"] + "_" + data["site_id"]
@@ -79,8 +82,8 @@ n_components = 0.75
 trainfile = os.path.join(sample_datapath,sample_filename)
 df_train = pd.read_csv(trainfile)
 df_train = create_feature(df_train)
-columns = df_train.columns
-print(columns)
+
+
 # specify parameters via map
 param = {'max_depth':15, 'eta':.02, 'objective':'binary:logistic', 'verbose':0,
          'subsample':1.0, 'min_child_weight':50, 'gamma':0,
@@ -88,26 +91,30 @@ param = {'max_depth':15, 'eta':.02, 'objective':'binary:logistic', 'verbose':0,
 
 y_all = df_train["click"]
 x_train = df_train.drop(["id","click","hour","C15","C16"],axis=1)
-#le = preprocessing.LabelEncoder()
+columns = x_train.columns
 
-columns_me_id = ["site_id","site_domain","site_category","app_id","app_domain","app_category","device_id","device_ip","device_model","C14","C17","C19","C20","C21","hour1","app_site_id","app_site_id_model"]
-columns_onehot_id = ["C1","banner_pos","device_type","device_conn_type","C18","size","time_period","day","weekday"]
-me = MeanEncoder(columns_me_id,target_type='classification')
-enc = OneHotEncoder()
-pca = PCA(n_components=n_components)
-x_onehot = df_train[columns_onehot_id]
-x_me = df_train[columns_me_id]
-x_train_onehot = enc.fit_transform(x_onehot)
-x_train_me = me.fit_transform(x_me,y_all).values
-print(x_train_onehot.shape)
+#le = preprocessing.LabelEncoder()
+columns_objectid = ["site_id","site_domain","site_category","app_id","app_domain","app_category","device_id","device_ip","device_model","app_site_id","app_site_id_model"]
+#columns_me_id = ["site_id","site_domain","site_category","app_id","app_domain","app_category","device_id","device_ip","device_model","C14","C17","C19","C20","C21","hour1","app_site_id","app_site_id_model"]
+#columns_onehot_id = ["C1","banner_pos","device_type","device_conn_type","C18","size","time_period","day","weekday"]
+me = MeanEncoder(columns_objectid,target_type='classification')
+#enc = OneHotEncoder()
+#x_onehot = df_train[columns_onehot_id]
+#x_me = df_train[columns_me_id]
+#x_train_onehot = enc.fit_transform(x_onehot)
+#删除object类型特征
+x_train_me = me.fit_transform(x_train,y_all).drop(columns_objectid,axis=1)
+columns = x_train_me.columns
+print(columns)
+#print(x_train_onehot.shape)
+print(x_train_me.info())
+#print(x_train_me.head())
 print(x_train_me.shape)
-X_all = sparse.hstack((x_train_onehot,x_train_me))
-print(X_all)
-sys.exit(0)
+#X_all = sparse.hstack((x_train_onehot,x_train_me))
 #print(y_all)
 #划分数据集
 print("split dataset.")
-x_train, x_val, y_train, y_val = train_test_split(X_all, y_all, test_size = 0.2, random_state = 2018)
+x_train, x_val, y_train, y_val = train_test_split(x_train_me, y_all, test_size = 0.2, random_state = 2018)
 
 dtrain = xgb.DMatrix(x_train, y_train, feature_names=columns)
 dtest = xgb.DMatrix(x_val,y_val,feature_names=columns)
@@ -115,7 +122,7 @@ watchlist1 = [(dtrain,'train'),(dtest,'test')]
 bst = xgb.train(param, dtrain, num_round,early_stopping_rounds=10,evals=watchlist1)
 #pred_leaf=True,
 
-del X_all
+del x_train_me
 '''
 
 test_preds = bst.predict(dtest,pred_leaf=False)
@@ -127,12 +134,14 @@ train_accuracy = accuracy_score(y_test, test_predictions)
 print ("Train Accuary: %.2f%%" % (train_accuracy * 100.0))
 '''
 # 显示重要特征
-plot_importance(bst)
-plt.savefig(os.path.join(output,"feature_importtance.png"))
+ax = plot_importance(bst)
+flg = ax.figure
+flg.set_size_inches(6,10)
+flg.savefig(os.path.join(output,"feature_importtance.png"))
 #保存xgboost模型数据
 print("saving xgboost model")
 joblib.dump(bst,os.path.join(output,"xgb_ctr_joblib.dat"))
-
+sys.exit(0)
 #plt.show()
 #得到新特征
 
@@ -159,21 +168,18 @@ enc = OneHotEncoder()
 x_train_feature_onehot = enc.fit_transform(x_train_feature).toarray()
 x_val_feature_onehot = enc.transform(x_val_feature).toarray()
 
-#此处试着用MeanEncoder进行编码
-df_train_feature = pd.data
 '''
-此处应该用PCA降维操作，限于内存不够大，只进行一般的标准化。
-'''
+此处应该用PCA降维操作，但是应用降维后，内存溢出，试试不降维是什么效果
+
 #此处onehot，特征急剧增加，必须进行降维操作
 #设置PCA参数
 print("Run PCA")
-
-
+pca = PCA(n_components=n_components)
 x_train_feature_pca = pca.fit_transform(x_train_feature_onehot)
 print(x_train_feature_pca.shape)
 print("Validate PCA")
 x_val_feature_pca = pca.transform(x_val_feature_onehot)
-
+'''
 
 #new_test_feature_onehot = enc.fit_transform(new_test_feature).toarray()
 del x_train_feature
@@ -184,15 +190,15 @@ print(x_train_feature_onehot.shape)
 #进行LR预测
 # 定义LR模型
 lr = LogisticRegression()
-lr.fit(x_train_feature_pca,y_train)
+lr.fit(x_val_feature_onehot,y_train)
 
 
-y_train_proba = lr.predict_proba(x_train_feature_pca)
-y_val_proba = lr.predict_proba(x_val_feature_pca)
-y_train_pred = lr.predict(x_train_feature_pca)
+y_train_proba = lr.predict_proba(x_val_feature_onehot)
+y_val_proba = lr.predict_proba(x_val_feature_onehot)
+y_train_pred = lr.predict(x_val_feature_onehot)
 
 #利用验证集验证模型效果
-y_val_pred = lr.predict(x_val_feature_pca)
+y_val_pred = lr.predict(x_val_feature_onehot)
 train_accuracy = accuracy_score(y_train, y_train_pred)
 val_accuracy = accuracy_score(y_val,y_val_pred)
 print("Train accuracy_score: ",train_accuracy)

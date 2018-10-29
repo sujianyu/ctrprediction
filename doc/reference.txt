@@ -46,6 +46,22 @@ plt.switch_backend('agg')
 http://www.zeroyx.com/index.php?r=site/art&id=17&title_id=99
 
 
+增量学习研究
+如何使用scikit-learn加载先前保存的模型并使用新的培训数据扩展模型
+https://stackoverrun.com/cn/q/7331854
+
+使用sklearn.linear_model.SGDClassifier增量模型进行学习的记录
+https://blog.csdn.net/shiheyingzhe/article/details/82316616
+https://www.codetd.com/article/3450899
+
+TIPS FOR DEALING WITH BIG DATA IN PYTHON
+https://www.dummies.com/programming/big-data/data-science/tips-for-dealing-with-big-data-in-python/
+
+Scikit-learn——LogisticRegression与SGDClassifier
+http://www.voidcn.com/article/p-wujddria-brw.html
+
+
+
 MeanEncoder
 def procdess_display_address_train_test(df_train, y_train, df_test):
     n_train_samples = len(df_train.index)    

@@ -8,15 +8,17 @@ import numpy as np
 import pandas as pd
 import sys,os
 datapath = "./data"
+output="output"
 #print(datapath)
 trainfile = os.path.join(datapath ,"train.csv")
 df_reader = pd.read_csv(trainfile,chunksize=1000000)
 count  = 0
 index = 0
-split_train_filename = "train_split_"
+splitfilename = "train_split_"
 for df in df_reader:
     index += 1
-    split_train_filename = split_train_filename + index + ".csv"
+    split_train_filename = os.path.join(output,splitfilename + str(index) + ".csv")
+    print("split_train_filename=",split_train_filename)
     print("saving chunk:", index)
     with open(split_train_filename,"w") as split_trainfile:
 
