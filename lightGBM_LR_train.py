@@ -78,7 +78,7 @@ sample_datapath = "/data/sujianyu/ctrsample/"
 #train_datapath = "/data/barnett007/ctr-data/"
 sample_filename = "train_sample2.csv"
 target_filename = "train_y.csv"
-#train_filename = "train.csv"
+train_filename = "train.csv"
 output = "/output"
 #本机运行时的路径
 output = "output"
@@ -86,7 +86,7 @@ sample_datapath = "./data"
 num_round = 5
 n_components = 0.75
 #trainfile = os.path.join(train_datapath ,train_filename)
-trainfile = os.path.join(sample_datapath,sample_filename)
+trainfile = os.path.join(sample_datapath,train_filename)
 train_yfile = os.path.join(output,target_filename)
 df_y = pd.read_csv(train_yfile)
 print("y_shape:",df_y.shape)
@@ -167,10 +167,20 @@ for df_train in df_reader:
 
 
     x_train_pred_leaf = gbm.predict(x_train,pred_leaf=True)
+    y_train_pred = gbm.predict(x_train)
+    y_val_pred = gbm.predict(x_val)
+    tr_logloss = log_loss(y_train, y_train_pred)
+    print("train loglosss:",tr_logloss)
+    val_logloss = log_loss(y_val,y_val_pred)
+    print("validate logloss:",val_logloss)
+    x_axis.append(i)
+    y_axis.append(val_logloss)
     #y_train_pred_proba = gbm.predict(x_train)
     print("x_train_pred_leaf.shape",x_train_pred_leaf.shape)
     #print("y_train_pred:",y_train_pred_proba)
-
+    print("i=",i)
+    '''
+    
     #取训练集预测叶子数据
     #transformed_train_matrix = leaftomatrx(y_train_pred_leaf,num_leaf)
     print('Calculate val feature importances...')
@@ -210,6 +220,7 @@ for df_train in df_reader:
     del x_train_feature_onehot
     del x_val_feature_onehot
     gc.collect()
+    '''
     i += 1
     #sys.exit(0)
 import matplotlib.pyplot as plt
