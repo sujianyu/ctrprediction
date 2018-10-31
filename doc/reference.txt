@@ -63,6 +63,10 @@ http://www.voidcn.com/article/p-wujddria-brw.html
 Which algorithm takes the crown: Light GBM vs XGBOOST?
 https://www.analyticsvidhya.com/blog/2017/06/which-algorithm-takes-the-crown-light-gbm-vs-xgboost/
 
+
+https://github.com/ChenglongChen/tensorflow-DeepFM/tree/master/example
+
+
 MeanEncoder
 def procdess_display_address_train_test(df_train, y_train, df_test):
     n_train_samples = len(df_train.index)    
