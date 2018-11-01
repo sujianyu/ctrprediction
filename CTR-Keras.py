@@ -74,7 +74,7 @@ def create_feature(data):
 sample_datapath = "/data/sujianyu/ctrsample/"
 #train_datapath = "/data/barnett007/ctr-data/"
 train_filename = "train_sample2.csv"
-train_filename = "train.csv"
+#train_filename = "train.csv"
 # 第一步：初始化模型爲None,設置模型保存路徑
 model = None
 datapath = "./data"
@@ -86,7 +86,9 @@ i = 1
 columns_objectid = ["site_id", "site_domain", "site_category", "app_id", "app_domain", "app_category", "device_id",
                         "device_ip", "device_model", "app_site_id", "app_site_id_model"]
 me = MeanEncoder(columns_objectid, target_type='classification')
-pd_reader = pd.read_csv(train_file,chunksize=1000000)
+pd_reader = pd.read_csv(train_file,chunksize=100000)
+y_logloss = []
+x_index = []
 for df_train in pd_reader:
     print("i=",i)
     #x_data = train[x_cols]
@@ -133,3 +135,17 @@ for df_train in pd_reader:
     print('第%2d 批次數據，loss=%.4f, mse=%.4f, mae=%.4f, mape=%.4f' % (i, loss, mse, mae, mape))
 
     i += 1
+    x_index.append(i)
+    y_logloss.append(loss)
+
+#print(x_index)
+#print(y_logloss)
+import matplotlib.pyplot as plt
+plt.figure()
+plt.plot(x_index,y_logloss)
+plt.xlabel('index')
+plt.ylabel('score')
+plt.tight_layout()
+plt.savefig(os.path.join(output,'score.png'))
+plt.close()
+#plt.show()
