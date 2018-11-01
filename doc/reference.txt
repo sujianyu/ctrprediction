@@ -93,3 +93,5 @@ The Brain：http://www.thebrain.com.cn/
 qing10:24:29
 GraphLab Create
 
+深度神经网络（DNN）模型与前向传播算法
+https://www.cnblogs.com/pinard/p/6418668.html
