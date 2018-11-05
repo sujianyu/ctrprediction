@@ -67,6 +67,10 @@ https://www.analyticsvidhya.com/blog/2017/06/which-algorithm-takes-the-crown-lig
 https://github.com/ChenglongChen/tensorflow-DeepFM/tree/master/example
 
 
+FTRL 
+https://blog.csdn.net/u011747443/article/details/71106932
+https://blog.csdn.net/dengxing1234/article/details/73277251
+
 MeanEncoder
 def procdess_display_address_train_test(df_train, y_train, df_test):
     n_train_samples = len(df_train.index)    
