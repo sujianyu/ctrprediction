@@ -21,17 +21,20 @@ from random import random
 import sys,os
 import pickle
 datapath = "./data"
+output = "output"
+new_featurename = "new_featrue.csv"
 train_filename = "train_sample2.csv"
 test_filename = "test"
 train_file= os.path.join(datapath,train_filename)
 test_file = os.path.join(datapath,test_filename)
+new_feature_file = os.path.join(output,new_featurename)
 
 submission = 'ftrl1sub.csv'  # path of to be outputted submission file
 
 num_feature = 22
-columns_id = ["site_id","site_domain","app_id","app_domain","device_id","device_ip"]
-columns_category = ["C1","site_category","banner_pos","device_type","app_category","device_model","device_conn_type","device_type","C18","C20","C14","C15","C16","C17","C19","C21"]
-columns_num = ["hour"]
+columns_id = ["site_id","site_domain","app_id","app_domain","device_id","device_ip","app_site_id"]
+columns_category = ["C1","site_category","banner_pos","device_type","app_category","device_model","device_conn_type","device_type","C18","C20","C14","C15","C16","C17","C19","C21","app_site_id_model"]
+columns_num = ["hour","hour1","day","weekday","time_period","size"]
 target = "click"
 
 dh = DataGen(num_feature,target,columns_id,columns_category,columns_num)
