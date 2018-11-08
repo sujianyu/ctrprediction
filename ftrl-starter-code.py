@@ -22,13 +22,14 @@ import pickle
 ##############################################################################
 
 # A, paths
-datapath = "./"
+datapath = "./data"
+output = "output"
 train_filename = "train.csv"
 test_filename = "test"
 train= os.path.join(datapath,train_filename)
 test = os.path.join(datapath,test_filename)
 
-submission = 'ftrl1sub.csv'  # path of to be outputted submission file
+submission = os.path.join(output,'ftrl1sub.csv')  # path of to be outputted submission file
 
 # B, model
 alpha = .005  # learning rate
@@ -215,13 +216,14 @@ def data(path, D):
         #print row
         
         try:
-            ID=row['ID']
-            del row['ID']
+            ID=row['id']
+            del row['id']
         except:
             pass
         # process clicks
         y = 0.
-        target='target'#'IsClick' 
+        #target='target'#'IsClick'
+        target="click"
         if target in row:
             if row[target] == '1':
                 y = 1.

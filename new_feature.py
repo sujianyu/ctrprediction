@@ -48,10 +48,11 @@ def create_feature(data):
     return data
 if __name__ == "__main__":
     train_file_name = "train.csv"
-    new_feature_filename = "new_featrue.csv"
+    test_file_name = "test"
+    new_feature_filename = "test_new_featrue.csv"
     data_path = "./data"
     output = "output"
-    df_reader = pd.read_csv(os.path.join(data_path,train_file_name),chunksize=200000)
+    df_reader = pd.read_csv(os.path.join(data_path,test_file_name),chunksize=200000)
     count = 0
     index = 0
     with open(os.path.join(output, new_feature_filename), "w") as newfeature:

@@ -24,7 +24,7 @@ datapath = "./data"
 output = "output"
 new_featurename = "new_featrue.csv"
 train_filename = "train_sample2.csv"
-test_filename = "test"
+test_filename = "test_new_featrue.csv"
 train_file= os.path.join(datapath,train_filename)
 test_file = os.path.join(datapath,test_filename)
 new_feature_file = os.path.join(output,new_featurename)
@@ -38,9 +38,9 @@ columns_num = ["hour","hour1","day","weekday","time_period","size"]
 target = "click"
 
 dh = DataGen(num_feature,target,columns_id,columns_category,columns_num)
-dh.train(train_file)
-ftrl = FTRLP(rate=10)
-ftrl.partial_fit(dh,train_file)
+dh.train(new_feature_file)
+ftrl = FTRLP(rate=100)
+ftrl.partial_fit(dh,new_feature_file)
 y_predict = ftrl.predict(dh,test_file)
 print(y_predict)
 
