@@ -24,10 +24,12 @@ import pickle
 # A, paths
 datapath = "./data"
 output = "output"
-train_filename = "train.csv"
-test_filename = "test"
-train= os.path.join(datapath,train_filename)
-test = os.path.join(datapath,test_filename)
+train_filename = "new_featrue.csv"
+sample_filename = "train_sample2.csv"
+test_filename = "test_new_featrue.csv"
+train = os.path.join(datapath,sample_filename)
+train = os.path.join(output,train_filename)
+test = os.path.join(output,test_filename)
 
 submission = os.path.join(output,'ftrl1sub.csv')  # path of to be outputted submission file
 
@@ -268,8 +270,8 @@ for e in range(epoch):
             #print count,loss/count
             print('%s\tencountered: %d\tcurrent logloss: %f' % (
                 datetime.now(), count, loss/count))
-        if count>10000: # comment this out when you run it locally.
-            break
+        #if count>10000: # comment this out when you run it locally.
+           # break
 
 
 count=0
@@ -280,15 +282,29 @@ print ('write result')
 ##############################################################################
 # start testing, and build Kaggle's submission file ##########################
 ##############################################################################
+x_sample = []
+y_logloss = []
 with open(submission, 'w') as outfile:
-    outfile.write('ID,target\n')
+    outfile.write('id,click\n')
     for  ID, x, y in data(test, D):
         count+=1
         p = learner.predict(x)
         loss += logloss(p, y)
-
+        #ID =  '{:.0f}'.format(ID)
+        #print("ID ",ID)
         outfile.write('%s,%s\n' % (ID, str(p)))
-        if count%1000==0:
+        if count%10000==0:
             #print count,loss/count
             print('%s\tencountered: %d\tcurrent logloss: %f' % (
                 datetime.now(), count, loss/count))
+            y_logloss.append(loss/count)
+            x_sample.append(count/1000)
+import matplotlib.pyplot as plt
+plt.figure()
+plt.plot(x_sample,y_logloss)
+plt.xlabel('index')
+plt.ylabel('logloss')
+plt.tight_layout()
+plt.savefig(os.path.join(output,'score_ftrl.png'))
+plt.close()
+#plt.show()
