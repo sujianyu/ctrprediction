@@ -48,17 +48,22 @@ def create_feature(data):
     return data
 if __name__ == "__main__":
     train_file_name = "train.csv"
-    test_file_name = "test"
-    new_feature_filename = "test_new_featrue.csv"
+    test_file_name = "test.csv"
+    newtest_feature_filename = "test_new_feature.csv"
+    newtrain_feature_filename = "train_new_feature.csv"
     data_path = "./data"
     output = "output"
-    df_reader = pd.read_csv(os.path.join(data_path,test_file_name),chunksize=200000)
+    inputfile = os.path.join(data_path,test_file_name)
+    #inputfile = os.path.join(data_path,train_file_name)
+    outputfile = os.path.join(output,newtest_feature_filename)
+    #outputfile =  os.path.join(output,newtrain_feature_filename)
+    df_reader = pd.read_csv(inputfile,chunksize=200000,dtype={'id': object})
     count = 0
     index = 0
-    with open(os.path.join(output, new_feature_filename), "w") as newfeature:
+    with open(outputfile, "a") as newfeature:
         for df in df_reader:
             df_newfeature = create_feature(df)
-            df_newfeature["id"] = df_newfeature["id"].apply(lambda x: '{:.0f}'.format(x))
+            #df_newfeature["id"] = df_newfeature["id"].apply(lambda x: '{:.0f}'.format(x))
             if index == 0:
                 df_newfeature.to_csv(newfeature,index=False,header=True)
             else:

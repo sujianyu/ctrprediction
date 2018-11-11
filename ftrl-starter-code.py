@@ -24,10 +24,10 @@ import pickle
 # A, paths
 datapath = "./data"
 output = "output"
-train_filename = "new_featrue.csv"
+train_filename = "train_new_feature.csv"
 sample_filename = "train_sample2.csv"
-test_filename = "test_new_featrue.csv"
-train = os.path.join(datapath,sample_filename)
+test_filename = "test_new_feature.csv"
+#train = os.path.join(datapath,sample_filename)
 train = os.path.join(output,train_filename)
 test = os.path.join(output,test_filename)
 
@@ -266,7 +266,7 @@ for e in range(epoch):
         loss += logloss(p, y)
         learner.update(x, p, y)
         count+=1
-        if count%1000==0:
+        if count%10000==0:
             #print count,loss/count
             print('%s\tencountered: %d\tcurrent logloss: %f' % (
                 datetime.now(), count, loss/count))
@@ -284,6 +284,7 @@ print ('write result')
 ##############################################################################
 x_sample = []
 y_logloss = []
+
 with open(submission, 'w') as outfile:
     outfile.write('id,click\n')
     for  ID, x, y in data(test, D):
@@ -298,7 +299,7 @@ with open(submission, 'w') as outfile:
             print('%s\tencountered: %d\tcurrent logloss: %f' % (
                 datetime.now(), count, loss/count))
             y_logloss.append(loss/count)
-            x_sample.append(count/1000)
+            x_sample.append(count/10000)
 import matplotlib.pyplot as plt
 plt.figure()
 plt.plot(x_sample,y_logloss)
